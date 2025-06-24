@@ -193,19 +193,6 @@ exports.fetchGithubData = async (req, res) => {
           const commitsRes = await axios.get(`https://api.github.com/repos/${org.login}/${repo.name}/commits?per_page=100`, { headers });
           const commits = commitsRes.data;
           console.log(`🧾 ${commits.length} commits`);
-        //   await Commit.insertMany(
-        //     commits.map((c) => ({
-        //       integrationId: integration._id,
-        //       sha: c.sha,
-        //       author: c.commit.author,
-        //       committer: c.commit.committer,
-        //       message: c.commit.message,
-        //       url: c.html_url,
-        //       repo: repo.name,
-        //       org: org.login,
-        //     })),
-        //     { ordered: false }
-        //   );
           const commitOps = commits.map((c) => ({
   updateOne: {
     filter: { sha: c.sha, integrationId: integration._id },
@@ -231,20 +218,7 @@ await Commit.bulkWrite(commitOps);
           const pullsRes = await axios.get(`https://api.github.com/repos/${org.login}/${repo.name}/pulls?state=all&per_page=100`, { headers });
           const pulls = pullsRes.data;
           console.log(`🔁 ${pulls.length} pull requests`);
-        //   await Pull.insertMany(
-        //     pulls.map((p) => ({
-        //       integrationId: integration._id,
-        //       pullId: p.id,
-        //       title: p.title,
-        //       state: p.state,
-        //       created_at: p.created_at,
-        //       merged_at: p.merged_at,
-        //       user: p.user,
-        //       repo: repo.name,
-        //       org: org.login,
-        //     })),
-        //     { ordered: false }
-        //   );
+        
         const pullOps = pulls.map((p) => ({
   updateOne: {
     filter: { pullId: p.id, integrationId: integration._id },
@@ -272,20 +246,7 @@ await Pull.bulkWrite(pullOps);
           const issuesRes = await axios.get(`https://api.github.com/repos/${org.login}/${repo.name}/issues?state=all&per_page=100`, { headers });
           const issues = issuesRes.data.filter((i) => !i.pull_request);
           console.log(`🐞 ${issues.length} issues`);
-        //   await Issue.insertMany(
-        //     issues.map((i) => ({
-        //       integrationId: integration._id,  
-        //       issueId: i.id,
-        //       title: i.title,
-        //       state: i.state,
-        //       user: i.user,
-        //       created_at: i.created_at,
-        //       comments_url: i.comments_url,
-        //       repo: repo.name,
-        //       org: org.login,
-        //     })),
-        //     { ordered: false }
-        //   );
+        
         const issueOps = issues.map((i) => ({
   updateOne: {
     filter: { issueId: i.id, integrationId: integration._id },
@@ -306,17 +267,6 @@ await Pull.bulkWrite(pullOps);
 await Issue.bulkWrite(issueOps);
 
 
-        //   for (const issue of issues) {
-        //     const commentsRes = await axios.get(issue.comments_url, { headers });
-        //     const comments = commentsRes.data;
-        //     await IssueChangelog.create({
-        //       integrationId: integration._id,
-        //       issueId: issue.id,
-        //       comments,
-        //       repo: repo.name,
-        //       org: org.login,
-        //     });
-        //   }
         for (const issue of issues) {
   const existing = await IssueChangelog.findOne({ integrationId: integration._id, issueId: issue.id });
   if (!existing) {
@@ -341,19 +291,7 @@ await Issue.bulkWrite(issueOps);
         const usersRes = await axios.get(`https://api.github.com/orgs/${org.login}/members`, { headers });
         const users = usersRes.data;
         console.log(`👥 ${users.length} members in org`);
-        // await GitHubUser.insertMany(
-        //   users.map((u) => ({
-        //     integrationId: integration._id,
-        //     githubId: u.id,
-        //     login: u.login,
-        //     name: u.name || '',
-        //     email: u.email || '',
-        //     avatar_url: u.avatar_url,
-        //     type: u.type,
-        //     org: org.login,
-        //   })),
-        //   { ordered: false }
-        // );
+    
 
         const bulkOps = users.map((u) => ({
   updateOne: {
